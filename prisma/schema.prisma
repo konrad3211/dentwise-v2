@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  // jezeli nie wpisze sam id to ono zostanie wygenerowane samo 
+  id        String   @id @default(cuid())
+  //unique blokuje stworzenie takiego samego clerkId w userze 
+  clerkId   String   @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  phone     String?
+  //jezeli nie podam daty to sama zostanie utworzona
+  createdAt DateTime @default(now())
+  //@updatedAt to gotowiec który wie że jak coś się zmieni to ma to zapsiać jako data aktualna
+  updatedAt DateTime @updatedAt
+
+  // relationships
+  //appointments to jest tabela którą tworzę a Appointment[] odnosi się do osobnego modelu 
+  appointments Appointment[]
+
+//to robi to co mongoose automatycznie
+  @@map("users")
+}
+
+model Doctor {
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  phone      String   @unique
+  speciality String
+  bio        String?
+  imageUrl   String
+  gender     Gender
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // relationships
+  appointments Appointment[]
+
+  @@map("doctors")
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  date      DateTime
+  time      String // store time as string i.e. 14:30
+  duration  Int               @default(30) //duration in minutes
+  status    AppointmentStatus @default(CONFIRMED)
+  notes     String?
+  reason    String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  //foreign keys
+  userId   String
+  doctorId String
+
+  // relationships
+  // tutaj mowimy czym ma byc userId i doctorId, ze maja to byc id tych obiektow
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@map("appointments")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  COMPLETED
+}

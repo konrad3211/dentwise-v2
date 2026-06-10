@@ -1,15 +1,26 @@
-import { SignOutButton, SignUpButton, Show } from "@clerk/nextjs";
-
-export default function Home() {
+import CTA from "@/components/landing/CTA";
+import Footer from "@/components/landing/Footer";
+import Header from "@/components/landing/Header";
+import Hero from "@/components/landing/Hero";
+import HowItWorks from "@/components/landing/HowItWorks";
+import PricingSection from "@/components/landing/PricingSection";
+import WhatToAsk from "@/components/landing/WhatToAsk";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+export default async function Home() {
+  const user = await currentUser();
+  if (user) redirect("/dashboard");
   return (
     <div>
-      <h1>HomePage</h1>
-      <Show when="signed-out">
-        <SignUpButton mode="modal" />
-      </Show>
-      <Show when="signed-in">
-        <SignOutButton>Logout</SignOutButton>
-      </Show>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <Hero />
+        <HowItWorks />
+        <WhatToAsk />
+        <PricingSection />
+        <CTA />
+        <Footer />
+      </div>
     </div>
   );
 }
